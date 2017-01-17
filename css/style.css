@@ -1,0 +1,12 @@
+/*DOM Elements*/
+body{
+	font-family: 'Quicksand', sans-serif;
+}
+
+/*ID's*/
+#sideBar, #map{
+	height: 100vh;
+}
+#title{
+	font-family: 'Princess Sofia', cursive;
+}
