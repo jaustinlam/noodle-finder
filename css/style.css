@@ -2,11 +2,33 @@
 body{
 	font-family: 'Quicksand', sans-serif;
 }
+/*Classes*/
+.active{
+	color: red;
 
+}
+.logo{
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 99;
+}
+.btn-floating{
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	z-index: 99;
+
+}
 /*ID's*/
 #sideBar, #map{
-	height: 100vh;
+	height: 90vh;
 }
 #title{
 	font-family: 'Princess Sofia', cursive;
+}
+
+#zip-search{
+	height: 50px;
+	width: 50px;
 }
