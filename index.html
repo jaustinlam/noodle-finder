@@ -8,60 +8,54 @@
         <!-- CSS -->
         <link rel="stylesheet" type="text/css" href="css/materialize/css/materialize.min.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
-        <!-- <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"> -->
+       
         <!-- Google Fonts -->
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Princess+Sofia|Quicksand" rel="stylesheet">
     </head>
 
     <body>
-    <!-- NavBar -->
-    
-    		<!-- Menu Button -->
-    			<img class="responsive-img logo" src="images/logo.png">
-	    		<a href="#" data-activates="slide-out" class="btn-floating button-collapse">
-		    		<i class="material-icons black-text">menu</i>
-		    	</a>
-		    
-		    <div class="row">
-		    <div class="col s12">
-		    <form data-bind="submit: onMapUpdate">
-		    	<div class="input-field zip-search">
-		    		<input id="search" type="search" data-bind="textInput: zipcode" required>
-		    		<label for="search"><i class="material-icons">search</i></label>
-		    		<i class="material-icons">close</i>
+    	<!-- Main Logo -->
+    	<img class="responsive-img logo" src="images/logo.png">
+    	<!-- Menu Button -->
+	    <a href="#" data-activates="slide-out" class="btn-floating button-collapse">
+		    <i class="material-icons black-text">menu</i>
+		</a>
+		<!-- Main Search Bar -->
+		<div class="headrow row transparent">  
+			<form data-bind="submit: onMapUpdate">
+		    	<div class="col s12 m6 l3">
+			    	<div class="input-field zip-search">
+			    		<input class="validate" id="search" type="search" pattern="[0-9]{5}" data-bind="textInput: zipcode" required>
+			    		<label for="search"><i class="material-icons">search</i>Enter your zip</label>
+			    		<i class="material-icons">close</i>
+			    	</div>
 		    	</div>
-		    	<button type="submit">Submit</button>
 		    </form>
-		    </div>
-		    </div>
-	 
+		</div>
 
-    <div class ="row" id="restaurant-list">
-    	<!-- Side Bar -->
-    	<ul id="slide-out" class="side-nav">
-    		<!-- Search Bar -->
-    		<form>
-	    		<div class="input-field white">
-	    			<input id="search" type="search" required>
-	    			<label for="search"><i class="material-icons">search</i></label>
-	    			<i class="material-icons">close</i>
-	    		</div>
-    		</form>
-    		<ul data-bind="foreach: mapRestaurants">
-    			<li class="lists" data-bind="text: name, attr: {id: id}, click: $parent.clickOpen" id=""></li>
+		<!-- Slide Out Menu -->
+    	<div class ="row" id="restaurant-list">
+    		<!-- Side Bar -->
+    		<ul id="slide-out" class="side-nav">
+    			<!-- Search Bar -->
+    			<form data-bind="submit: filteringMaps">
+		    		<div class="input-field white">
+		    			<input id="searchbar" type="search" data-bind="textInput: searchValue" required>
+		    			<label for="searchbar"><i class="material-icons">search</i></label>
+		    			<i class="material-icons">close</i>
+		    		</div>
+	    		</form>
+	    		<ul data-bind="foreach: mapRestaurants">
+	    			<li class="lists" data-bind="text: name, click: $parent.clickOpen, visible: visible" id=""></li>
+	    		</ul>
     		</ul>
-
-    	</ul>
+    	</div>
     	<!-- Map -->
     	<div class="col s12" id="map">
     	</div>
-    </div>
 
-
-
-
-    <!-- Javascript -->
+    	<!-- Javascript -->
     	<script src="js/libs/jquery.min.js"></script>
     	<script type="text/javascript" src="js/libs/materialize.min.js"></script>
     	<script src="js/libs/knockout-3.2.0.js"></script>
@@ -72,7 +66,4 @@
 
 
     </body>
-
-
-
 </html>
