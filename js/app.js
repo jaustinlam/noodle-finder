@@ -1,15 +1,17 @@
-$(document).ready(function(){
-	$(".button-collapse").sideNav();
-	
-});
-var pos;
-var images = [];
 
 // On Testing please enter your Client ID and Client Secret from FourSquare. Then uncomment.
 // var CLIENT_ID = 'ENTER YOUR ID';
 // var CLIENT_SECRET = 'ENTER YOUR ID';
-
+var pos;
+/**
+	* @description Intializes the Map and View Model
+*/
 function init(){
+
+	/**
+	* @description Intializes the View Model
+	* @class
+	*/
 	function MapViewModel(){
 		var self = this;
 		
@@ -20,6 +22,8 @@ function init(){
 		this.zipcode = ko.observable();
 		this.searchValue = ko.observable();
 		this.boldText = ko.observable();
+
+		$(".button-collapse").sideNav();
 
 		// Google Map
 		self.map = new google.maps.Map(document.getElementById('map'), {
@@ -48,6 +52,10 @@ function init(){
 			});
 		};
 
+		/**
+		* @description Sets the current date
+		* @returns {string} The current date
+		*/
 		self.setDate = function(){
 			var today = new Date();
 			var dd = today.getDate();
@@ -64,7 +72,10 @@ function init(){
 			return today
 		};
 
-		
+		/**
+		* @description Calls the FourSquare API and sets results to self.MapRestaurants()
+		* Creates subsequent map markers for all in the array
+		*/
 		self.createRestaurants = function(){
 			// FourSquare Client Details.
 			var today = self.setDate();
@@ -124,7 +135,9 @@ function init(){
 
 		};
 
-
+		/**
+		* @description Clears all markers on map
+		*/
 		self.clearMarkers = function(){
 			if (self.markerArray().length > 0){
 				for (var i = 0; i < self.markerArray().length; i++){
@@ -134,6 +147,9 @@ function init(){
 				};
 		};
 
+		/**
+		* @description Creates markers on the map with infowindows
+		*/
 		self.createMarkers = function(){
 			self.clearMarkers();
 			// Placing Markers on Map
@@ -167,8 +183,6 @@ function init(){
 					'">View Menu</a></p><br><br>' +
 					'<p>Information from FourSquare</p>';
 
-
-
 				self.marker.info = new google.maps.InfoWindow({
 					content: markerContent
 				});
@@ -178,11 +192,13 @@ function init(){
 					return function(){
 						self.markerAction(markerCopy);
 					};
-					})(self.marker));
+				})(self.marker));
 			};
 		};
 
-		// This function updates the map center when the user enters a new zipcode
+		/**
+		* @description Updates the map center when the user enters a new zipcode
+		*/
 		self.onMapUpdate = function(data){
 			var geocodeTimeout = setTimeout(function(){
 			alert('Sorry something went wrong with updating the Map. Please refresh and try again');
@@ -215,6 +231,10 @@ function init(){
 			});
 		};
 
+		/**
+		* @description Causes a marker to open and change icon when applied to a listener
+		* @param {Object} marker - The marker in which to apply the actions to
+		*/
 		self.markerAction = function(marker){
 			for (var i = self.markerArray().length - 1; i >= 0; i--) { 
 				self.markerArray()[i].info.close();
@@ -225,6 +245,9 @@ function init(){
 			self.map.setCenter(marker.position);
 		};
 
+		/**
+		* @description On search filters restaurants and sets all visible to visible(true)
+		*/
 		self.filteringMaps = function(){
 			var lowerSearch = self.searchValue().toLowerCase();
 			for (var i = self.mapRestaurants().length - 1; i >= 0; i--) {
