@@ -3,6 +3,11 @@ $(document).ready(function(){
 	
 });
 var pos;
+var images = [];
+
+// On Testing please enter your Client ID and Client Secret from FourSquare. Then uncomment.
+// var CLIENT_ID = 'ENTER YOUR ID';
+// var CLIENT_SECRET = 'ENTER YOUR ID';
 
 function init(){
 	function MapViewModel(){
@@ -14,6 +19,7 @@ function init(){
 		this.markerArray = ko.observableArray([]);
 		this.zipcode = ko.observable();
 		this.searchValue = ko.observable();
+		this.boldText = ko.observable();
 
 		// Google Map
 		self.map = new google.maps.Map(document.getElementById('map'), {
@@ -22,8 +28,12 @@ function init(){
 			disableDefaultUI: true,
 		});
 
-		// Update the map with Geolocation if available 
+		// Update the map with Geolocation if available
+		
 		if (navigator.geolocation) {
+			var geoLocationTimeout = setTimeout(function(){
+			alert('Sorry failed to get location, refresh or enter your zipcode');
+			}, 8000); 
 			navigator.geolocation.getCurrentPosition(function(position){
 				lat(position.coords.latitude);
 				lng(position.coords.longitude);
@@ -34,6 +44,7 @@ function init(){
 			self.map.setCenter(pos);
 			self.map.setZoom(11);
 			self.createRestaurants();
+			clearTimeout(geoLocationTimeout);
 			});
 		};
 
@@ -56,43 +67,43 @@ function init(){
 		
 		self.createRestaurants = function(){
 			// FourSquare Client Details.
-			var CLIENT_ID = 'YBJDPS3IUH1XOTWRGY0CVLSTUUEPCVLUIXPWGIUOEMD3NNVH';
-			var CLIENT_SECRET = 'YI1HYR2XN2U0YNLIYETVHCUXYSWA03WIFIVMPXHGIDQ1W5U0';
-			var categoryID = '4bf58dd8d48988d14a941735'; 
 			var today = self.setDate();
-			console.log(today);
 			var fourSquareTimeout = setTimeout(function(){
 			alert('Failed to get restaurant from FourSquare, please refresh and try again');
 			}, 8000);
 
 			$.ajax({
-			url: "https://api.foursquare.com/v2/venues/search?ll=" + lat() + "," + lng(),
+			url: "https://api.foursquare.com/v2/venues/explore?ll=" + lat() + "," + lng(),
 			dataType: 'jsonp',
 			data: 
 				"client_id=" + CLIENT_ID +
 				"&client_secret=" + CLIENT_SECRET +
-				"&intent=browse" +
 				"&radius=80000" +
-				"&categoryId=" + categoryID +
+				"&query=vietnamese" +
+				"&venuePhotos=1" +
 				"&v=" + today,
 				
-				// TO DO SET TIME AND DATE TO NOW
 				success: function(data) {
 					// Success message
 					console.log('Four Square Data Received');
-					// Clear the Timeout Error
-					clearTimeout(fourSquareTimeout);
+					
 					// Set returns to results
-					var results = data.response.venues;
+					var results = data.response.groups[0].items;
 					self.mapRestaurants.removeAll();
 					for (var i = results.length - 1; i >= 0; i--) {
-						var currentRestaurant = results[i];
+						var currentRestaurant = results[i].venue;
+						var restImageUrl = currentRestaurant.featuredPhotos.items[0].prefix +
+							"30x30" + currentRestaurant.featuredPhotos.items[0].suffix;
 						var restaurant = {
 							id: currentRestaurant.id,
 							name: currentRestaurant.name,
 							address: currentRestaurant.location.formattedAddress[0],
 							phone: currentRestaurant.contact.formattedPhone,
 							website: currentRestaurant.url,
+							image: restImageUrl,
+							rating: currentRestaurant.rating,
+							price: currentRestaurant.price.message,
+							tip: results[i].tips[0].text,
 							lat: currentRestaurant.location.lat,
 							lng: currentRestaurant.location.lng,
 							visible: ko.observable(true),
@@ -100,6 +111,8 @@ function init(){
 						// Push restaurant object to restaurants array
 						self.mapRestaurants.push(restaurant);
 					};
+					// Clear the Timeout Error
+					clearTimeout(fourSquareTimeout);
 					self.createMarkers();
 				
 				},
@@ -111,13 +124,18 @@ function init(){
 
 		};
 
-		self.createMarkers = function(){
-			function clearMarkers() {
+
+		self.clearMarkers = function(){
+			if (self.markerArray().length > 0){
 				for (var i = 0; i < self.markerArray().length; i++){
-					self.markerArray()[i].setMap(null);
-				}
-				markerArray.length = 0;
-			};
+						self.markerArray()[i].setMap(null);
+					}
+					self.markerArray().length = 0;
+				};
+		};
+
+		self.createMarkers = function(){
+			self.clearMarkers();
 			// Placing Markers on Map
 			for (var i = self.mapRestaurants().length - 1; i >= 0; i--) {
 				var currentRestaurant = self.mapRestaurants()[i];
@@ -134,16 +152,20 @@ function init(){
 					id: currentRestaurant.id,
 					visiblem: ko.observable(true)
 				});
-				var markerContent = '<h4>' +
+				var markerContent = '<h6>' +
 					currentRestaurant.name +
-					'</h4><br>' +
-					'<p>' + currentRestaurant.address +
+					'</h6><img class="rest-pic" src="' +
+					currentRestaurant.image + '">'+ '<br>' +
+					'<p><i>' + currentRestaurant.tip + '</i><br><br>' + 
+					'Rating: ' + currentRestaurant.rating +
+					' Price: ' + currentRestaurant.price +
+					'<br><p>' + currentRestaurant.address +
 					'<br>' +
-					'<p>' + currentRestaurant.phone +
+					currentRestaurant.phone +
 					'<br>' +
 					'<a href="' + currentRestaurant.website +
 					'">View Menu</a></p><br><br>' +
-					'<p>Information from FourSquare</p>'
+					'<p>Information from FourSquare</p>';
 
 
 
@@ -152,34 +174,23 @@ function init(){
 				});
 				self.markerArray.push(self.marker);
 
-				self.marker.addListener('mouseover', (function(markerCopy){
+				self.marker.addListener('click', (function(markerCopy){
 					return function(){
-						// markerCopy.info.open(self.map, markerCopy);
-						// change icon
-						markerCopy.setAnimation(google.maps.Animation.BOUNCE);
-						
+						self.markerAction(markerCopy);
 					};
-				})(self.marker));
-				self.marker.addListener('mouseout', (function(markerCopy){
-					return function(){
-						markerCopy.info.close();
-						markerCopy.setAnimation(null);
-					};
-				})(self.marker));
+					})(self.marker));
 			};
 		};
 
 		// This function updates the map center when the user enters a new zipcode
 		self.onMapUpdate = function(data){
-			console.log(self.zipcode());
-			console.log(lat());
 			var geocodeTimeout = setTimeout(function(){
 			alert('Sorry something went wrong with updating the Map. Please refresh and try again');
 			}, 8000);
 			$.ajax({
 				url: "https://maps.googleapis.com/maps/api/geocode/" +
 					"json?key=AIzaSyDxLsPdWpj7FzoQL_N0HswX-x_3yL9_7Co",
-				dataType: "json", // Need to figure out jsonp
+				dataType: "json", 
 				data:
 					"&new_forward_geocoder=true" +
 					"&address=" + self.zipcode(),
@@ -193,17 +204,26 @@ function init(){
 						lng: lng(),
 					};
 					self.map.setCenter(pos);
-					console.log(pos)
 					self.map.setZoom(11);
 					self.createRestaurants();
 				},
 				error: function(){
-					alert('Sorry something went wrong with updating the Map. Please refresh and try again');
+					alert('Sorry something went wrong with updating the Map.' +
+						' Please refresh and try again');
 				},
 
 			});
 		};
 
+		self.markerAction = function(marker){
+			for (var i = self.markerArray().length - 1; i >= 0; i--) { 
+				self.markerArray()[i].info.close();
+				self.markerArray()[i].setIcon('images/icon.png');
+			};
+			marker.info.open(self.map, marker);
+			marker.setIcon('images/icon2.png');
+			self.map.setCenter(marker.position);
+		};
 
 		self.filteringMaps = function(){
 			var lowerSearch = self.searchValue().toLowerCase();
@@ -221,14 +241,12 @@ function init(){
 					self.mapRestaurants()[i].visible(false);
 
 					for (var x = self.markerArray().length - 1; x >= 0; x--){
-						console.log("test");
 						if(self.markerArray()[x].id == self.mapRestaurants()[i].id){
 							self.markerArray()[x].setMap(null);
 						};
 					};
 				};
 			};
-
 		};
 
 
@@ -243,29 +261,17 @@ function init(){
 				currentMark.info.close();
 				currentMark.setAnimation(null);
 				if (currentMark.id == data.id ){
-				currentMark.info.open(self.map, currentMark);
-				currentMark.setAnimation(google.maps.Animation.BOUNCE);
-				var animationTimeout = setTimeout(function(){
-					console.log("test");
-					currentMark.setAnimation(null);
-					}, 3000);
-				
+				self.markerAction(currentMark);
 				};
 			};
 		};
-		
 	};
 	var vm = new MapViewModel();
 
 	ko.applyBindings(vm);
 };
 
-// Todos
-// When hovering over list item make it bold
-// invoke jsonp on geocode api
-// Add Timeout on geolocation
-// Make a modal and show that when click an open
-// Clear Marker Array on intializiation
-// Resolve animation issue when selecting a restaurant from list
+
+
 
 
