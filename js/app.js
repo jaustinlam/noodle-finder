@@ -1,7 +1,4 @@
 
-// On Testing please enter your Client ID and Client Secret from FourSquare. Then uncomment.
-// var CLIENT_ID = 'ENTER YOUR ID';
-// var CLIENT_SECRET = 'ENTER YOUR ID';
 var pos;
 /**
 	* @description Intializes the Map and View Model
@@ -272,7 +269,9 @@ function init(){
 			};
 		};
 
-
+		/**
+		* @description Opens a marker when restaurant is clicked on list
+		*/
 		self.clickOpen = function(data, event){
 			for ( var i = 0; i <= self.markerArray().length - 1; i++){
 				var currentMark = self.markerArray()[i];
