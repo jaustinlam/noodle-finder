@@ -99,6 +99,12 @@ function init(){
 					var results = data.response.groups[0].items;
 					self.mapRestaurants.removeAll();
 					for (var i = results.length - 1; i >= 0; i--) {
+						var tip;
+						if(results[i].tips){
+							tip = results[i].tips[0].text;
+						} else {
+							tip = "No Comments";
+						};
 						var currentRestaurant = results[i].venue;
 						var restImageUrl = currentRestaurant.featuredPhotos.items[0].prefix +
 							"30x30" + currentRestaurant.featuredPhotos.items[0].suffix;
@@ -111,7 +117,7 @@ function init(){
 							image: restImageUrl,
 							rating: currentRestaurant.rating,
 							price: currentRestaurant.price.message,
-							tip: results[i].tips[0].text,
+							tip: tip,
 							lat: currentRestaurant.location.lat,
 							lng: currentRestaurant.location.lng,
 							visible: ko.observable(true),
