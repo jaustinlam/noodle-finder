@@ -8,8 +8,9 @@ An interactive map that searches your zipcode and returns Vietnamese Restaurants
 4. Open index.html in the browser of your choice.
 
 ## Usage
+Please note that this app is intended for use only in the USA. It will not work in other countries.
 * Using your location to find restaurants
-> If location is allowed by your browser hit accept when your browser asks for permission.
+> Click the location button on the top of the page. If location is allowed by your browser hit accept when your browser asks for permission.
 
 * Using your zipcode to find restaurants
 > Enter your zipcode in the supplied search box and hit enter/return.

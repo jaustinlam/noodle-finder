@@ -16,21 +16,26 @@
     	
 		<!-- Main Search Bar -->
 		<div class="headrow row white">
-        <!-- Main Logo -->
-        <img class="responsive-img logo" src="images/logo.png">
-        <!-- Menu Button -->
-        <button href="#" data-activates="slide-out" class="btn-floating button-collapse purple darken-4">
-            <i class="material-icons white-text">menu</i>
-        </button>  
-			<form data-bind="submit: onMapUpdate">
-		    	<div class="col s12 m6 l3">
-			    	<div class="input-field zip-search">
-			    		<input class="validate" id="search" type="search" pattern="[0-9]{5}" data-bind="textInput: zipcode" required>
-			    		<label for="search"><i class="material-icons">search</i>Enter your zip</label>
-			    		<i class="material-icons">close</i>
-			    	</div>
-		    	</div>
-		    </form>
+            <!-- Main Logo -->
+            <img class="responsive-img logo" src="images/logo.png">
+            <!-- Menu Button -->
+            <button href="#" data-activates="slide-out" class="btn-floating button-collapse purple darken-4">
+                <i class="material-icons white-text">menu</i>
+            </button>  
+    			<form data-bind="submit: onMapUpdate">
+    		    	<div class="col s9 m6 l3">
+    			    	<div class="input-field zip-search">
+    			    		<input class="validate" id="search" type="search" pattern="[0-9]{5}" data-bind="textInput: zipcode" required>
+    			    		<label for="search"><i class="material-icons">search</i>Enter your zip (US only)</label>
+    			    		<i class="material-icons">close</i>
+    			    	</div>
+    		    	</div>
+    		    </form>
+                <div class="col s3 m6 l3">
+                    <button class="btn white location-btn" data-bind="click: getLocation">
+                        <i class="purple-text text-darken-4 material-icons">my_location</i>
+                    </button>
+                </div>
 		</div>
 
 		<!-- Slide Out Menu -->

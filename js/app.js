@@ -29,24 +29,30 @@ function init(){
 			disableDefaultUI: true,
 		});
 
-		// Update the map with Geolocation if available
-		
-		if (navigator.geolocation) {
-			var geoLocationTimeout = setTimeout(function(){
-			alert('Sorry failed to get location, refresh or enter your zipcode');
-			}, 8000); 
-			navigator.geolocation.getCurrentPosition(function(position){
-				lat(position.coords.latitude);
-				lng(position.coords.longitude);
-				pos = {
-					lat: lat(),
-					lng: lng(),
-				};
-			self.map.setCenter(pos);
-			self.map.setZoom(11);
-			self.createRestaurants();
-			clearTimeout(geoLocationTimeout);
-			});
+		/**
+		* @description Gets users current location if avalible
+		*/
+		self.getLocation = function(){
+			if (navigator.geolocation) {
+				var geoLocationTimeout = setTimeout(function(){
+				alert('Sorry failed to get location, refresh or enter your zipcode');
+				}, 8000); 
+				navigator.geolocation.getCurrentPosition(function(position){
+					lat(position.coords.latitude);
+					lng(position.coords.longitude);
+					pos = {
+						lat: lat(),
+						lng: lng(),
+					};
+				self.map.setCenter(pos);
+				self.map.setZoom(11);
+				self.createRestaurants();
+				clearTimeout(geoLocationTimeout);
+				});
+			} else {
+				alert('Sorry location does not seem to be avalible on your browser' +
+					'. Try entering in your zip');
+			};
 		};
 
 		/**
@@ -77,7 +83,8 @@ function init(){
 			// FourSquare Client Details.
 			var today = self.setDate();
 			var fourSquareTimeout = setTimeout(function(){
-			alert('Failed to get restaurant from FourSquare, please refresh and try again');
+			alert('Failed to get restaurant from FourSquare.' +
+				'Please make sure that you are looking in the US, refresh and try again');
 			}, 8000);
 
 			$.ajax({
@@ -96,39 +103,44 @@ function init(){
 					console.log('Four Square Data Received');
 					
 					// Set returns to results
-					var results = data.response.groups[0].items;
-					self.mapRestaurants.removeAll();
-					for (var i = results.length - 1; i >= 0; i--) {
-						var tip;
-						if(results[i].tips){
-							tip = results[i].tips[0].text;
+					if (data.response.groups[0].items){
+						var results = data.response.groups[0].items;
+						self.mapRestaurants.removeAll();
+						for (var i = results.length - 1; i >= 0; i--) {
+							var tip;
+							if(results[i].tips){
+								tip = results[i].tips[0].text;
+							} else {
+								tip = "No Comments";
+							};
+							var currentRestaurant = results[i].venue;
+							var restImageUrl = currentRestaurant.featuredPhotos.items[0].prefix +
+								"100x100" + currentRestaurant.featuredPhotos.items[0].suffix;
+							var restaurant = {
+								id: currentRestaurant.id,
+								name: currentRestaurant.name,
+								address: currentRestaurant.location.formattedAddress[0],
+								phone: currentRestaurant.contact.formattedPhone,
+								website: currentRestaurant.url,
+								image: restImageUrl,
+								rating: currentRestaurant.rating,
+								price: currentRestaurant.price.message,
+								tip: tip,
+								lat: currentRestaurant.location.lat,
+								lng: currentRestaurant.location.lng,
+								visible: ko.observable(true),
+							};
+							// Push restaurant object to restaurants array
+							self.mapRestaurants.push(restaurant);
+						};
+						// Clear the Timeout Error
+						clearTimeout(fourSquareTimeout);
+						self.createMarkers();
 						} else {
-							tip = "No Comments";
+							alert('Sorry it seems we did not find any restaurants' + 
+								' in your searched area. Make sure you are searching' + 
+								' in the US and try another zip code.')
 						};
-						var currentRestaurant = results[i].venue;
-						var restImageUrl = currentRestaurant.featuredPhotos.items[0].prefix +
-							"30x30" + currentRestaurant.featuredPhotos.items[0].suffix;
-						var restaurant = {
-							id: currentRestaurant.id,
-							name: currentRestaurant.name,
-							address: currentRestaurant.location.formattedAddress[0],
-							phone: currentRestaurant.contact.formattedPhone,
-							website: currentRestaurant.url,
-							image: restImageUrl,
-							rating: currentRestaurant.rating,
-							price: currentRestaurant.price.message,
-							tip: tip,
-							lat: currentRestaurant.location.lat,
-							lng: currentRestaurant.location.lng,
-							visible: ko.observable(true),
-						};
-						// Push restaurant object to restaurants array
-						self.mapRestaurants.push(restaurant);
-					};
-					// Clear the Timeout Error
-					clearTimeout(fourSquareTimeout);
-					self.createMarkers();
-				
 				},
 				// Error if fails
 				error: function(){
@@ -171,10 +183,15 @@ function init(){
 					id: currentRestaurant.id,
 					visiblem: ko.observable(true)
 				});
-				var markerContent = '<h6>' +
+				var markerContent = '<div class="row">' + 
+					'<div class="col s12">' + 
+					'<img class="circle responsive-img rest-img" src="' +
+					currentRestaurant.image + '">'+ '</div>' +
+					'<div class="col s12 purple rest-name">' + 
+					'<h6 class="center-align">' +
 					currentRestaurant.name +
-					'</h6><img class="rest-pic" src="' +
-					currentRestaurant.image + '">'+ '<br>' +
+					'</h6></div>' + 
+					'<div class="col s12">' +
 					'<p><i>' + currentRestaurant.tip + '</i><br><br>' + 
 					'Rating: ' + currentRestaurant.rating +
 					' Price: ' + currentRestaurant.price +
@@ -184,7 +201,7 @@ function init(){
 					'<br>' +
 					'<a href="' + currentRestaurant.website +
 					'">View Menu</a></p><br><br>' +
-					'<p>Information from FourSquare</p>';
+					'<p>Information from FourSquare</p></div></div>';
 
 				self.marker.info = new google.maps.InfoWindow({
 					content: markerContent
