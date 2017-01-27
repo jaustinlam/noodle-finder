@@ -33,9 +33,6 @@ function init(){
 		*/
 		self.getLocation = function(){
 			if (navigator.geolocation) {
-				var geoLocationTimeout = setTimeout(function(){
-				alert('Sorry failed to get location, refresh or enter your zipcode');
-				}, 8000); 
 				navigator.geolocation.getCurrentPosition(function(position){
 					lat(position.coords.latitude);
 					lng(position.coords.longitude);
@@ -46,7 +43,6 @@ function init(){
 				self.map.setCenter(pos);
 				self.map.setZoom(11);
 				self.createRestaurants();
-				clearTimeout(geoLocationTimeout);
 				});
 			} else {
 				alert('Sorry location does not seem to be avalible on your browser' +
@@ -81,10 +77,6 @@ function init(){
 		self.createRestaurants = function(){
 			// FourSquare Client Details.
 			var today = self.setDate();
-			var fourSquareTimeout = setTimeout(function(){
-			alert('Failed to get restaurant from FourSquare.' +
-				'Please make sure that you are looking in the US, refresh and try again');
-			}, 8000);
 
 			$.ajax({
 			url: "https://api.foursquare.com/v2/venues/explore?ll=" + lat() + "," + lng(),
@@ -96,16 +88,15 @@ function init(){
 				"&query=vietnamese" +
 				"&venuePhotos=1" +
 				"&v=" + today,
-				
-				success: function(data) {
-					// Success message
+
+			}).done(function(data) {
+				// Success message
 					console.log('Four Square Data Received');
 
 					// Fallback in the off chance a restaurant doesn't have an id. Assign one
 					var idDefault = 0;
-					
 					// Set returns to results
-					if (data.response.groups[0].items){
+					if (data.response.groups){
 						var results = data.response.groups[0].items;
 						self.mapRestaurants.removeAll();
 						for (var i = results.length - 1; i >= 0; i--) {
@@ -149,21 +140,15 @@ function init(){
 							// Push restaurant object to restaurants array
 							self.mapRestaurants.push(restaurant);
 						};
-						// Clear the Timeout Error
-						clearTimeout(fourSquareTimeout);
 						self.createMarkers();
 						} else {
 							alert('Sorry it seems we did not find any restaurants' + 
 								' in your searched area. Make sure you are searching' + 
 								' in the US and try another zip code.')
 						};
-				},
-				// Error if fails
-				error: function(){
-					alert('Sorry data failed to load')
-				} 
+			}).fail(function(jqXHR, textStatus) {
+				alert('Sorry data failed to load');
 			});
-
 		};
 
 		// Create initial set of restaurants on default
@@ -253,8 +238,9 @@ function init(){
 				data:
 					"&new_forward_geocoder=true" +
 					"&address=" + self.zipcode(),
-				success: function(data) {
-					console.log("Geocode received")
+
+			}).done(function(data) {
+				console.log("Geocode received")
 					lat(data.results[0].geometry.location.lat);
 					lng(data.results[0].geometry.location.lng);
 					pos = {
@@ -264,12 +250,10 @@ function init(){
 					self.map.setCenter(pos);
 					self.map.setZoom(11);
 					self.createRestaurants();
-				},
-				error: function(){
-					alert('Sorry something went wrong with updating the Map.' +
-						' Please refresh and try again');
-				},
 
+			}).fail(function(jqXHR, textStatus) {
+				alert('Sorry something went wrong with updating the Map.' +
+						' Please refresh and try again');
 			});
 		};
 
