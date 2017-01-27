@@ -29,6 +29,8 @@ function init(){
 			disableDefaultUI: true,
 		});
 
+		
+
 		/**
 		* @description Gets users current location if avalible
 		*/
@@ -149,6 +151,9 @@ function init(){
 			});
 
 		};
+
+		// Create initial set of restaurants on default
+		self.createRestaurants();
 
 		/**
 		* @description Clears all markers on map
