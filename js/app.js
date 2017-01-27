@@ -1,10 +1,9 @@
 
 var pos;
 /**
-	* @description Intializes the Map and View Model
+	* @description Success callback intializes the Map and View Model
 */
 function init(){
-
 	/**
 	* @description Intializes the View Model
 	* @class
@@ -28,8 +27,6 @@ function init(){
 			center: new google.maps.LatLng(lat(), lng()),
 			disableDefaultUI: true,
 		});
-
-		
 
 		/**
 		* @description Gets users current location if avalible
@@ -103,30 +100,47 @@ function init(){
 				success: function(data) {
 					// Success message
 					console.log('Four Square Data Received');
+
+					// Fallback in the off chance a restaurant doesn't have an id. Assign one
+					var idDefault = 0;
 					
 					// Set returns to results
 					if (data.response.groups[0].items){
 						var results = data.response.groups[0].items;
 						self.mapRestaurants.removeAll();
 						for (var i = results.length - 1; i >= 0; i--) {
-							var tip;
-							if(results[i].tips){
-								tip = results[i].tips[0].text;
-							} else {
-								tip = "No Comments";
-							};
+							var id, name, address, phone, website, image, rating, price, tip;
 							var currentRestaurant = results[i].venue;
-							var restImageUrl = currentRestaurant.featuredPhotos.items[0].prefix +
+							var cRestLoc = currentRestaurant.location;
+							var cRestCnt = currentRestaurant.contact;
+							var cRestPht = currentRestaurant.featuredPhotos;
+
+
+							currentRestaurant.id ? id = currentRestaurant.id : id = idDefault++;
+							currentRestaurant.name ? name = currentRestaurant.name : name = "no name provided";
+							cRestLoc.formattedAddress[0] ? address = cRestLoc.formattedAddress[0] : address = "no address provided";
+							cRestCnt.formattedPhone ? phone = cRestCnt.formattedPhone : phone = "no phone provided";
+							currentRestaurant.url ? website = currentRestaurant.url : website = "no website provided";
+							currentRestaurant.rating ? rating = currentRestaurant.rating : rating = "N/A";
+							currentRestaurant.price.message ? price = currentRestaurant.price.message : price ="not avalible";
+							results[i].tips ? tip = results[i].tips[0].text : tip = "no comments avalible";
+
+							if (cRestPht.items[0].prefix && cRestPht.items[0].suffix) {
+								image = currentRestaurant.featuredPhotos.items[0].prefix +
 								"100x100" + currentRestaurant.featuredPhotos.items[0].suffix;
+							} else {
+								image = "http://placehold.it/100x100";
+							};
+
 							var restaurant = {
-								id: currentRestaurant.id,
-								name: currentRestaurant.name,
-								address: currentRestaurant.location.formattedAddress[0],
-								phone: currentRestaurant.contact.formattedPhone,
-								website: currentRestaurant.url,
-								image: restImageUrl,
-								rating: currentRestaurant.rating,
-								price: currentRestaurant.price.message,
+								id: id,
+								name: name,
+								address: address,
+								phone: phone,
+								website: website,
+								image: image,
+								rating: rating,
+								price: price,
 								tip: tip,
 								lat: currentRestaurant.location.lat,
 								lng: currentRestaurant.location.lng,
@@ -218,6 +232,13 @@ function init(){
 						self.markerAction(markerCopy);
 					};
 				})(self.marker));
+
+				// Change icon back to default when info window closed
+				self.marker.info.addListener('closeclick', (function(markerCopy){
+					return function(){
+						markerCopy.setIcon('images/icon.png');
+					};
+				})(self.marker));
 			};
 		};
 
@@ -225,9 +246,6 @@ function init(){
 		* @description Updates the map center when the user enters a new zipcode
 		*/
 		self.onMapUpdate = function(data){
-			var geocodeTimeout = setTimeout(function(){
-			alert('Sorry something went wrong with updating the Map. Please refresh and try again');
-			}, 8000);
 			$.ajax({
 				url: "https://maps.googleapis.com/maps/api/geocode/" +
 					"json?key=AIzaSyDxLsPdWpj7FzoQL_N0HswX-x_3yL9_7Co",
@@ -237,7 +255,6 @@ function init(){
 					"&address=" + self.zipcode(),
 				success: function(data) {
 					console.log("Geocode received")
-					clearTimeout(geocodeTimeout);
 					lat(data.results[0].geometry.location.lat);
 					lng(data.results[0].geometry.location.lng);
 					pos = {
@@ -319,6 +336,13 @@ function init(){
 	var vm = new MapViewModel();
 
 	ko.applyBindings(vm);
+};
+
+/**
+* @description Error callback if map doesn't load
+*/
+mapLoadError = function(){
+	alert('Sorry the map failed to load. Please refresh and try again');
 };
 
 

@@ -5,60 +5,61 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"/>
         <title>Get Viet: Restaurant Finder</title>
-        <link rel="stylesheet" type="text/css" href="css/materialize/css/materialize.min.css">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" href="css/materialize/css/materialize.min.css">
+        <link rel="stylesheet" href="css/style.css">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Princess+Sofia|Quicksand" rel="stylesheet">
     </head>
 
     <body>
-
-    	
-		<!-- Main Search Bar -->
-		<div class="headrow row white">
-            <!-- Main Logo -->
-            <img class="responsive-img logo" src="images/logo.png">
-            <!-- Menu Button -->
-            <button href="#" data-activates="slide-out" class="btn-floating button-collapse purple darken-4">
-                <i class="material-icons white-text">menu</i>
-            </button>  
-    			<form data-bind="submit: onMapUpdate">
-    		    	<div class="col s9 m6 l3">
-    			    	<div class="input-field zip-search">
-    			    		<input class="validate" id="search" type="search" pattern="[0-9]{5}" data-bind="textInput: zipcode" required>
-    			    		<label for="search"><i class="material-icons">search</i>Enter your zip (US only)</label>
-    			    		<i class="material-icons">close</i>
-    			    	</div>
-    		    	</div>
-    		    </form>
-                <div class="col s3 m6 l3">
-                    <button class="btn white location-btn" data-bind="click: getLocation">
-                        <i class="purple-text text-darken-4 material-icons">my_location</i>
-                    </button>
-                </div>
-		</div>
-
 		<!-- Slide Out Menu -->
-    	<div class ="row" id="restaurant-list">
-    		<!-- Side Bar -->
-    		<ul id="slide-out" class="side-nav">
-    			<!-- Search Bar -->
-    			<form data-bind="submit: filteringMaps">
-		    		<div class="input-field white">
-		    			<input id="searchbar" type="search" data-bind="textInput: searchValue" required>
-		    			<label for="searchbar"><i class="material-icons">search</i></label>
-		    			<i class="material-icons">close</i>
-		    		</div>
-	    		</form>
-	    		<ul data-bind="foreach: mapRestaurants">
-	    			<li class="lists" data-bind=" text: name, click: $parent.clickOpen, visible: visible " id=""></li>
-	    		</ul>
-    		</ul>
-    	</div>
-    	<!-- Map -->
-    	<div class="col s12" id="map">
-    	</div>
+        <aside>
+        	<div class ="row" id="restaurant-list">
+        		<!-- Side Bar -->
+        		<ul id="slide-out" class="side-nav">
+        			<!-- Search Bar -->
+        			<form data-bind="event: {keyup: filteringMaps}">
+    		    		<div class="input-field white">
+    		    			<input id="searchbar" type="search" data-bind="textInput: searchValue">
+    		    			<label for="searchbar"><i class="material-icons">search</i></label>
+    		    			<i class="material-icons">close</i>
+    		    		</div>
+    	    		</form>
+    	    		<ul data-bind="foreach: mapRestaurants">
+    	    			<li class="lists" data-bind=" text: name, click: $parent.clickOpen, visible: visible " id=""></li>
+    	    		</ul>
+        		</ul>
+        	</div>
+        </aside>
 
+    	<!-- Map -->
+        <main>
+        <!-- Main Search Bar -->
+            <div class="headrow row white">
+                <!-- Main Logo -->
+                <img class="responsive-img logo" src="images/logo.png">
+                <!-- Menu Button -->
+                <button href="#" data-activates="slide-out" class="btn-floating button-collapse purple darken-4">
+                    <i class="material-icons white-text">menu</i>
+                </button>  
+                    <form data-bind="submit: onMapUpdate">
+                        <div class="col s9 m6 l3">
+                            <div class="input-field zip-search">
+                                <input class="validate" id="search" type="search" pattern="[0-9]{5}" data-bind="textInput: zipcode">
+                                <label for="search"><i class="material-icons">search</i>Enter your zip (US only)</label>
+                                <i class="material-icons">close</i>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="col s3 m6 l3">
+                        <button class="btn white location-btn" data-bind="click: getLocation">
+                            <i class="purple-text text-darken-4 material-icons">my_location</i>
+                        </button>
+                    </div>
+            </div>
+        	<div class="col s12" id="map">
+        	</div>
+        </main>
 
     	<!-- Javascript -->
     	<script src="js/libs/jquery.min.js"></script>
@@ -66,7 +67,8 @@
         <script src="js/clientdetails.js"></script>
     	<script src="js/app.js"></script>
         <script type="text/javascript" src="js/libs/materialize.min.js"></script>
-    	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDxLsPdWpj7FzoQL_N0HswX-x_3yL9_7Co&callback=init">
+    	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDxLsPdWpj7FzoQL_N0HswX-x_3yL9_7Co&callback=init"
+            async defer onerror="mapLoadError()">
     	</script>
     	
 
